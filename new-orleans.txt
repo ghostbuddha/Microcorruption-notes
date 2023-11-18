@@ -1,0 +1,20 @@
+New Orleans
+
+First thing I did was look for main
+
+main:
+	call create_password
+	puts "Enter the password..."
+	call get_password
+	call check_password
+	tst r15 ; the return value of check_password
+	jnz to our win condition
+
+so the next thing I did was look into check_password, because it might be comparing to a stored value
+
+check_password:
+	clr r14 						; empty out the counter(?)
+	mov r15, r13 					; r13 = r15
+	add r14, r13					; r13 = r13 + r14
+	cmp.b @r13, 0x2400(r14)			; 
+	
