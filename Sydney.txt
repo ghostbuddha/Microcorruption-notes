@@ -1,0 +1,5 @@
+New info is that the password is no longer hidden in memory
+
+first thing I do is break at main
+main:
+  calls get_password

@@ -13,14 +13,15 @@ main:
 so the next thing I did was look into check_password, because it might be comparing to a stored value
 
 check_password:
-	clr r14 						; empty out the counter(?)
-	mov r15, r13 					; r13 = r15
-	add r14, r13					; r13 = r13 + r14
+	clr r14 				; empty out the counter(?)
+	mov r15, r13 				; r13 = r15
+	add r14, r13				; r13 = r13 + r14
 	cmp.b @r13, 0x2400(r14)			; comparing the first byte of r13 with [r14+0x2400] (indirect displacement?)
-	jnz $+0xc						; if compare fails, return 0
+	jnz $+0xc				; if compare fails, return 0
 	
 create_password is right above check_password in memory, so I noticed r15 is set to 0x2400, and indexed byte by byte with ASCII values with the indirect displacement addressing mode
 
 64-22-5d-25-4e-25-45-00
 
 d"]%N%E is the password!
+password changes each time?
