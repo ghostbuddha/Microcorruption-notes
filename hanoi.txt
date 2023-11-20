@@ -1,0 +1,24 @@
+judging by the overview details, there's a comparison that involves setting a flag in memory
+break at main
+main:
+	call login
+	ret
+
+login:
+	puts out that passwords are between 8 and 16 characters
+	sets r14 to 0x1c and r15 to 0x2400 before calling getsn
+		is that normal? I have to check previous challenges to see
+	calls test_password_valid
+		if it returns 0, jump to the cmp.b command
+		if not 0, set the byte at 0x2410 to 0x8e first
+	compares the byte at 0x2410 with 0x11
+
+so we need to make sure that test_password_valid returns 0
+0x11 isn't a regular character, so we're gonna use hex encoded input
+
+test_password_valid:
+	calls int #0x7d on r14 and r15
+
+sent 16 41's, and then 11, and it worked
+
+the check was for the byte 0x10 bytes after the start, compared with 0x11, so I sent it as the 17th byte
