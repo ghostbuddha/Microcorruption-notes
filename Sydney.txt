@@ -22,3 +22,21 @@ check_password:
 	r15 is supposed to be 3d-63-61-36-3f-61-7d-25 or =ca6?a}%
 	
 for some reason, 0x0(r15) is set to 0x439c before the other bytes. How do I change the location it checks?
+0x439c is the location of the password itself. How does that get dereferenced?
+0x439c points to two bytes before the password, an area that it doesn't seem we're supposed to be working on
+	since it's 8 characters, and the buffer size is 64, I'll try to append 56 A's to see if that affects r15
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=ca6?a}%
+	it does not, now I need to find where r15 is getting set to this value
+	r15 is set to 0x439c at 444a, it's the value of sp
+	it's also set to that value from sp at 4444, which is before get_password
+	is there anywhere that increments sp or r15?
+	what happens if I write outside of the buffer?
+	=ca6?a}%AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB
+	nothing.
+	is it the endianness? it seems to actually be getting compared with the start of the password, it just hasn't been passing
+	633d3661613f257d or c=6aa?%}
+	it was the endianness.
+	
+	cmp #0x3d63, 0x0(r15) compares the the word at displacement +0x0 of the location stored in r15 in little endian.
+	I mistakenly looked at sp's position at the time of the cmp command instead of where r15 pointed.
+	
