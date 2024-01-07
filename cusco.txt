@@ -1,0 +1,62 @@
+main:
+	call login
+	
+login:
+	sp = sp - 0x10
+	mov "enter the password to continue" to r15
+	call puts
+	mov "Remember:..." to r15
+	call puts
+	mov 0x30 to r14
+	mov sp to r15
+	call getsn to take the password
+	mov sp to r15
+	call test_password_valid
+	tst r15 sets Z to 1 if r15 == 0
+	jump to fail state if Z is 1
+	continue to success state if Z is 0
+	
+
+test_password_valid:
+	SP - 2 → SP, r4 → @SP 
+		sp: 43ea
+		r4: 0000
+	sp → r4
+		sp: 43ea
+		r4: 43ea
+	r4 + 2 → r4
+		sp: 43ea
+		r4: 43ec
+	sp - 2 → sp
+		sp: 43e8
+		r4: 43ec
+	0x0 → (r4 - 0x4)
+		0x00 → 0x43ec - 0x4 == 0x43e8
+	r14 = 0xfffc
+	r14 = 0xfffc + 0x43ec = 0x43e8
+	push r14
+	push r15
+	push 0x7d
+	calls INT with r14, r15, and 0x7d
+		r14 == 0x43e8 → 0x00 
+		r15 == 0x43ee → password input
+		0x7d is mprotect syscall
+	mprotect:
+		int mprotect(void addr[.len], size_t len, int prot)
+		arguments are
+			starting address
+			length
+			mask for new permissions 
+		starting address must be at the start of a memory page
+
+starting with sending AAAA to see which value of mprotect is affected
+	test_password_valid returns 0, password isn't within 8-16 characters to be fair
+sending AAAABBBBCCCC also returns 0
+r15 is being set to the value at r4-0x4, or 0x43e8
+	how do we write to that address?
+__init_stack is at 0x4400, and the buffer for the password ends at 0x43fd
+in login, only 0x10 bytes are allocated, but 0x30 bytes are allowed to be entered in getsn
+this means we can still write over data
+the return address of login is at 0x43fe, which can be written over 
+sent 41414141424242424343434344444444 to pad and then 4644, the little endian address of unlock_door, which worked
+AAAABBBBCCCCDDDDFD also works
