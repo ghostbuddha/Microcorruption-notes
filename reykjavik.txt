@@ -1,0 +1,24 @@
+main:
+	sets r14 and r15 to 0x4520
+	r14 = 0xf8
+	r15 = 0x2400
+	call enc
+	call 0x2400
+	clear r15
+
+enc: 
+	a complex series of instructions that affects memory on the stack,
+	specifically after 0x2400
+
+breaking at INT doesn't work here?
+password is stored at 0x43da
+
+0x2400:
+	after enc, we can see b012 1000, which is call #0x10 at 0x2474
+	this is the int for printing each character
+	after input is taken, return to 0x43d2
+
+0x43d2:
+	cmp #0x656f, -0x24(r4) which is 0x43fe - 0x24 = 0x43da, where the password is stored
+
+entering 6f65 is the password
